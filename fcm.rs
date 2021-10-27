@@ -42,6 +42,17 @@ fn declare_args(commands: &Vec<String>) -> (String, Vec<String>) {
             for cmd_arg in commands[2..].iter() {
                 args.push( cmd_arg.to_string() );
             }
+        },
+        "test" => {
+            executer = String::from("cargo");
+            args.push("a.txt".to_owned());
+            args.push("1234".to_owned());
+            if commands.len() > 2 {
+                args.push(commands[2].to_owned());
+            }
+            else {
+                args.push("L".to_owned());
+            }
         }
         _ => {panic!("Command not found {:?}", commands)}
     };
