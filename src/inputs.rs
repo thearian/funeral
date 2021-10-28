@@ -9,7 +9,7 @@ pub fn get_and_read_inputs() -> (String, String, bool) {
             1 => println!("Enter file location: "),
             2 => println!("Enter the password: "),
             3 => println!("Enter L to lock by encryption or U to unlock by decryption: "),
-            _ => println!("Error Code: 1534"),
+            _ => panic!("Source code has unfixed bug."),
         };
         args.push( get_from_user() );
     };
@@ -29,6 +29,6 @@ fn get_from_user() -> String {
     let mut input = String::new();
     std::io::stdin()
         .read_line(&mut input)
-        .expect("error: unable to read user input");
+        .expect("\nFailed to read user input");
     return input;
 }

@@ -14,9 +14,9 @@ static ENCRYPT_DOMAIN: [char; 66] = [
 ];
 
 pub fn password_to_map(password: String) -> Map {
-    match password .parse::<u64>() {
+    match password.parse::<u64>() {
         Ok(seed) => seed_to_map(seed),
-        Err(error) => panic!("\n\tError code: 5293 including {}", error)
+        Err(error) => panic!("\nFailed to parse password to number {}", error)
     }
 }
 

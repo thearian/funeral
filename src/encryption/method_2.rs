@@ -16,7 +16,7 @@ pub fn lock_by_map(content: &String, map: &JsonValue) -> (String, String) {
             String::from(letter)
         ][random_index]
             .as_str()
-            .expect("Error code: 1389.");
+            .expect("\nMap json is not the type it needs to be.");
         locked.push_str(transalted);
     }
     (locked, password)
@@ -28,7 +28,7 @@ pub fn unlock_by_map(content: &String, map: &JsonValue, password: String) -> Str
         for translation in translations.members() {
             let tr = translation
                 .as_str()
-                .expect("Error code: 1249") ;
+                .expect("\nMap json is not the type it needs to be.");
             if content_mut.contains(tr) {
                 content_mut = content_mut.replace(tr, letter);
             }

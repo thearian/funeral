@@ -9,7 +9,7 @@ static ENCRYPT_DOMAIN: [char; 66] = [
 
 type WordLimit = (u8, u8);
 
-pub fn new_map(word_limits: WordLimit, char_map_count: u8) -> JsonValue {
+pub fn new_map(word_limits: WordLimit, char_map_count: usize) -> JsonValue {
     let mut map = JsonValue::new_object();
     ENCRYPT_DOMAIN.into_iter()
         .for_each(|letter| {
@@ -18,7 +18,7 @@ pub fn new_map(word_limits: WordLimit, char_map_count: u8) -> JsonValue {
     map
 }
 
-fn gen_char_map(word_limits: WordLimit, count: u8) -> JsonValue {
+fn gen_char_map(word_limits: WordLimit, count: usize) -> JsonValue {
     let mut char_map = JsonValue::new_array();
     for _ in 0..count {
         let word = gen_word(
