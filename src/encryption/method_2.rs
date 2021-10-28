@@ -1,17 +1,19 @@
 use json::JsonValue;
 use rand;
 use rand::Rng;
+use indicatif::ProgressBar;
 
-pub fn lock_by_map(content: &String, map: &JsonValue) -> (String, String) {
+pub fn lock_by_map(content: &String, map: &JsonValue) -> String {
     let mut rng = rand::thread_rng();
     let mut locked = String::new();
-    let mut password = String::new();
+    let pb = ProgressBar::new(content.len() as u64);
+    println!("Encryption is started:");
     for letter in content.chars() {
+        pb.inc(1);
         let random_index: usize = rng.gen_range(0,16);
         let mut random_index_string = random_index.to_string();
         random_index_string.push_str("-");
         let password_unit =  random_index_string.as_str();
-        password.push_str( password_unit );
         let transalted = &map[
             String::from(letter)
         ][random_index]
@@ -19,10 +21,11 @@ pub fn lock_by_map(content: &String, map: &JsonValue) -> (String, String) {
             .expect("\nMap json is not the type it needs to be.");
         locked.push_str(transalted);
     }
-    (locked, password)
+    pb.finish_with_message("Encryption is done");
+    locked
 }
 
-pub fn unlock_by_map(content: &String, map: &JsonValue, password: String) -> String {
+pub fn unlock_by_map(content: &String, map: &JsonValue) -> String {
     let mut content_mut = String::from(content);
     for (letter, translations) in map.entries() {
         for translation in translations.members() {

@@ -1,5 +1,6 @@
 use json::JsonValue;
 use rand::{self, Rng};
+use indicatif::ProgressBar;
 
 static ENCRYPT_DOMAIN: [char; 66] = [
     'q','w','e','r','t','y','u','i','o','p','a','s','d','f','g','h','j','k','l','z','x','c','v','b','n','m',' ','\n',
@@ -11,10 +12,14 @@ type WordLimit = (u8, u8);
 
 pub fn new_map(word_limits: WordLimit, char_map_count: usize) -> JsonValue {
     let mut map = JsonValue::new_object();
-    ENCRYPT_DOMAIN.into_iter()
+    let pb = ProgressBar::new(66); // ENCRYPT_DOMAIN len
+    println!("Map is being genereated:");
+    ENCRYPT_DOMAIN.iter()
         .for_each(|letter| {
+            pb.inc(1);
             map[String::from(*letter)] = gen_char_map(word_limits, char_map_count);
         });
+    pb.finish_with_message("Map is made");
     map
 }
 
@@ -24,7 +29,8 @@ fn gen_char_map(word_limits: WordLimit, count: usize) -> JsonValue {
         let word = gen_word(
             rand_range(word_limits.0 as usize, word_limits.1 as usize)
         );
-        char_map.push(word);
+        char_map.push(word)
+            .expect("Source code has unfixed bugs");
     }
     char_map
 }

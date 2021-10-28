@@ -18,13 +18,13 @@ use encryption::generate_map::new_map;
 use encryption::hashing::calculate_hash;
 
 fn main() {
-    let (filepath, password, lock_status) = get_and_read_inputs();
+    let (filepath, lock_status) = get_and_read_inputs();
     let content = read_file(&filepath);
     let map = new_map((16,128), 256);
     // Encrypt or Decrypt data
-    let (new_content, new_password) = match lock_status {
+    let new_content = match lock_status {
         true => lock_by_map(&content, &map),
-        false => (unlock_by_map(&content, &map, password), String::new()),
+        false => unlock_by_map(&content, &map),
     };
     // Saving files
     let filename = filepath[..filepath.len()-4]
@@ -55,10 +55,11 @@ fn main() {
     write_file(&hash_destination, &(json::stringify(calculate_hash(map_string))) )
         .expect("\nFailed to save the map hash file");
     
-    println!("Your will is {}",
+    println!("Your will is {} {}",
         match lock_status {
-            true => concat_str_and_string("locked with this password: ", &new_password),
-            false => concat_str_and_string("unlocked at ", &will_destination)
+            true => "locked at",
+            false => "unlocked at",
         },
+        &will_destination
     )
 }
