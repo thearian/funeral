@@ -13,7 +13,6 @@ pub fn lock_by_map(content: &String, map: &JsonValue) -> String {
         let random_index: usize = rng.gen_range(0,16);
         let mut random_index_string = random_index.to_string();
         random_index_string.push_str("-");
-        let password_unit =  random_index_string.as_str();
         let transalted = &map[
             String::from(letter)
         ][random_index]

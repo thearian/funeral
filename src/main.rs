@@ -1,8 +1,7 @@
-use json::{parse};
+use json;
 
 mod concat_str;
 use concat_str::{
-    concat_str_and_string,
     concat_string_and_str
 };
 
