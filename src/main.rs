@@ -27,6 +27,7 @@ fn main() {
         console::style("Reading your file").bold().green()
     );
     let content = read_file(&filepath);
+    println!("Read successfully");
     
     match lock_status {
         true => locking_process(content, filepath),
@@ -34,7 +35,12 @@ fn main() {
     };
 }
 
+
 fn locking_process(content: String, filepath: String) {
+    // Generating a new map
+    println!("{}",
+        console::style("Generating Map").bold().green()
+    );
     let map = new_map(WORD_LIMITS, WORD_COUNT, true);
 
     // Encrypt or data
@@ -109,6 +115,7 @@ fn unlocking_process(content: String, filepath: String) {
     )
 
 }
+
 
 fn gen_map_qual_to_hash(hash: &u64) -> String {
     let mut map = new_map(WORD_LIMITS, WORD_COUNT, false);

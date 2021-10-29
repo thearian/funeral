@@ -3,14 +3,22 @@ use rand::{self, Rng};
 use indicatif::ProgressBar;
 
 static ENCRYPT_DOMAIN: [char; 66] = [
-    'q','w','e','r','t','y','u','i','o','p','a','s','d','f','g','h','j','k','l','z','x','c','v','b','n','m',' ','\n',
+    'q','w','e','r','t','y','u','i','o','p',
+    'a','s','d','f','g','h','j','k','l',
+    'z','x','c','v','b','n','m',' ','\n',
     '1','2','3','4','5','6','7','8','9','0',
-    '~','!','@','#','$','%','^','&','*','(',')','_','+','-','=','{','}','|','[',']',':',';',',','.','/','<','>','?',
+    '~','!','@','#','$','%','^','&','*','(',')','_','+','-','=',
+    '{','}','|','[',']',':',';',',','.','/','<','>','?',
 ];
 
 type WordLimit = (u8, u8);
 
-pub fn new_map(word_limits: WordLimit, char_map_count: usize, include_progress: bool) -> JsonValue {
+
+pub fn new_map(
+    word_limits: WordLimit,
+    char_map_count: usize,
+    include_progress: bool
+) -> JsonValue {
     let mut map = JsonValue::new_object();
     let mut rand_memo: Vec<String> = Vec::new();
 
@@ -30,14 +38,21 @@ pub fn new_map(word_limits: WordLimit, char_map_count: usize, include_progress: 
                 &mut rand_memo
             );
         });
+    
     if include_progress {
         pb.finish_with_message("Map is made");
     }
     map
 }
 
-fn gen_char_map(word_limits: WordLimit, count: usize, rand_memo: &mut Vec<String>) -> JsonValue {
+
+fn gen_char_map(
+    word_limits: WordLimit,
+    count: usize,
+    rand_memo: &mut Vec<String>
+) -> JsonValue {
     let mut char_map = JsonValue::new_array();
+
     for _ in 0..count {
         let (mut word,mut is_old) = gen_new_word(word_limits, rand_memo);
         while is_old {
@@ -49,8 +64,10 @@ fn gen_char_map(word_limits: WordLimit, count: usize, rand_memo: &mut Vec<String
         char_map.push(word)
             .expect("Source code has unfixed bugs");
     }
+
     char_map
 }
+
 
 fn gen_new_word(
     word_limits: WordLimit,
@@ -59,12 +76,14 @@ fn gen_new_word(
     let word = gen_word(
         rand_range(word_limits.0 as usize, word_limits.1 as usize)
     );
+    
     let check_if_already_set: Vec<&String> = rand_memo.iter()
         .filter( |already_set_value| {
                 *word == **already_set_value
             }
         )
         .collect();
+    
     (word, check_if_already_set.len() > 0)
 }
 
@@ -77,7 +96,9 @@ fn gen_word(count: usize) -> String {
 }
 
 fn gen_char() -> char {
-    ENCRYPT_DOMAIN[rand_range(0,ENCRYPT_DOMAIN.len())]
+    ENCRYPT_DOMAIN[
+        rand_range(0,ENCRYPT_DOMAIN.len())
+    ]
 }
 
 fn rand_range(start: usize, end: usize) -> usize {

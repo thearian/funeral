@@ -1,9 +1,10 @@
 use std::env;
 
+
 pub fn get_and_read_inputs() -> (String, bool) {
     let mut args = get_env_args();
     
-    // get args that are not defined
+    // Getting the args that are not given
     for arg_number in args.len()..=2 {
         match arg_number {
             1 => println!("Enter file location: "),
@@ -19,9 +20,11 @@ pub fn get_and_read_inputs() -> (String, bool) {
     return (filename, lock_status);
 }
 
+
 pub fn get_env_args() -> Vec<String> {
     env::args().collect()
 }
+
 
 fn get_from_user() -> String {
     let mut input = String::new();
