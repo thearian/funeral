@@ -1,4 +1,5 @@
-use json;
+use json::JsonValue;
+use indicatif::{ProgressBar,ProgressStyle};
 
 mod concat_str;
 use concat_str::{
@@ -6,7 +7,7 @@ use concat_str::{
 };
 
 mod inputs;
-use inputs::{ get_and_read_inputs };
+use inputs::{ get_and_read_inputs, get_env_args };
 
 mod file;
 use file::{write_file, read_file};
@@ -19,22 +20,21 @@ use encryption::hashing::calculate_hash;
 fn main() {
     let (filepath, lock_status) = get_and_read_inputs();
     let content = read_file(&filepath);
-    let map = new_map((16,128), 256);
-    // Encrypt or Decrypt data
-    let new_content = match lock_status {
-        true => lock_by_map(&content, &map),
-        false => unlock_by_map(&content, &map),
+    match lock_status {
+        true => locking_process(content, filepath),
+        false => unlocking_process(content, filepath),
     };
+}
+
+fn locking_process(content: String, filepath: String) {
+    let map = new_map((16,128), 16, true);
+    // Encrypt or Decrypt data
+    let new_content = lock_by_map(&content, &map);
     // Saving files
     let filename = filepath[..filepath.len()-4]
         .to_owned();
     
-    let will_destination = concat_string_and_str(&filename,
-        match lock_status {
-            true => "-locked.txt",
-            false => "-unlocked.txt",
-        }
-    );
+    let will_destination = concat_string_and_str(&filename, "-locked.txt",);
     write_file(&will_destination, &new_content)
         .expect("\nFailed to save the translated will file.");
     
@@ -55,10 +55,60 @@ fn main() {
         .expect("\nFailed to save the map hash file");
     
     println!("Your will is {} {}",
-        match lock_status {
-            true => "locked at",
-            false => "unlocked at",
-        },
+        "locked at",
         &will_destination
     )
+}
+
+fn unlocking_process(content: String, filepath: String) {
+    let hash = &get_env_args()
+        [3]
+        .parse::<u64>()
+        .expect("Given hash is not type of Hash");
+    let map = json::parse(
+        &gen_map_qual_to_hash(&hash)
+    ).expect("Faild to parse");
+
+    let new_content = unlock_by_map(&content, &map);
+    // Saving files
+    let filename = filepath[..filepath.len()-4]
+        .to_owned();
+    
+    let will_destination = concat_string_and_str(&filename, "-unlocked.txt",);
+    write_file(&will_destination, &new_content)
+        .expect("\nFailed to save the translated will file.");
+        
+    println!("Your will is {} {}",
+        "unlocked at",
+        &will_destination
+    )
+
+}
+
+fn gen_map_qual_to_hash(hash: &u64) -> String {
+    let mut map = new_map((16,128), 4, false);
+    let mut map_string = json::stringify_pretty(map, 4);
+
+    let pb = ProgressBar::new(500);
+    let spinner_style = ProgressStyle::default_spinner()
+        .tick_chars("⠁⠂⠄⡀⢀⠠⠐⠈ ")
+        .template("{prefix:.bold.dim} {spinner} {wide_msg}");
+    pb.set_style(spinner_style.clone());
+    pb.set_prefix(format!("[ HASH ]"));
+    
+    let mut i = 0;
+    while calculate_hash(&map_string) != *hash {
+        i += 1;
+        pb.set_message(
+            format!("({}) {}: {}",
+                i,
+                hash,
+                calculate_hash(&map_string),
+            )
+        );
+        pb.inc(1);
+        map = new_map((16,128), 4, false);
+        map_string = json::stringify_pretty(map, 4);
+    }
+    map_string
 }

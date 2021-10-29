@@ -19,7 +19,7 @@ pub fn get_and_read_inputs() -> (String, bool) {
     return (filename, lock_status);
 }
 
-fn get_env_args() -> Vec<String> {
+pub fn get_env_args() -> Vec<String> {
     env::args().collect()
 }
 

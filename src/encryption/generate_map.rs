@@ -10,16 +10,22 @@ static ENCRYPT_DOMAIN: [char; 66] = [
 
 type WordLimit = (u8, u8);
 
-pub fn new_map(word_limits: WordLimit, char_map_count: usize) -> JsonValue {
+pub fn new_map(word_limits: WordLimit, char_map_count: usize, include_progress: bool) -> JsonValue {
     let mut map = JsonValue::new_object();
     let pb = ProgressBar::new(66); // ENCRYPT_DOMAIN len
-    println!("Map is being genereated:");
+    if include_progress {
+        println!("Map is being genereated:");
+    }
     ENCRYPT_DOMAIN.iter()
         .for_each(|letter| {
-            pb.inc(1);
+            if include_progress {
+                pb.inc(1);
+            }
             map[String::from(*letter)] = gen_char_map(word_limits, char_map_count);
         });
-    pb.finish_with_message("Map is made");
+    if include_progress {
+        pb.finish_with_message("Map is made");
+    }
     map
 }
 
