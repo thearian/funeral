@@ -1,5 +1,6 @@
-use json::JsonValue;
+use json;
 use indicatif::{ProgressBar,ProgressStyle};
+use console;
 
 mod concat_str;
 use concat_str::{
@@ -17,6 +18,9 @@ use encryption::method_2::{lock_by_map, unlock_by_map};
 use encryption::generate_map::new_map;
 use encryption::hashing::calculate_hash;
 
+static WORD_LIMITS: (u8,u8) = (16, 128);
+static WORD_COUNT: usize = 16;
+
 fn main() {
     let (filepath, lock_status) = get_and_read_inputs();
     let content = read_file(&filepath);
@@ -27,7 +31,7 @@ fn main() {
 }
 
 fn locking_process(content: String, filepath: String) {
-    let map = new_map((16,128), 16, true);
+    let map = new_map(WORD_LIMITS, WORD_COUNT, true);
     // Encrypt or Decrypt data
     let new_content = lock_by_map(&content, &map);
     // Saving files
@@ -36,7 +40,7 @@ fn locking_process(content: String, filepath: String) {
     
     let will_destination = concat_string_and_str(&filename, "-locked.txt",);
     write_file(&will_destination, &new_content)
-        .expect("\nFailed to save the translated will file.");
+        .expect("\nFailed to save the locked will file.");
     
     // NOTE: Saving map key as json will be removed later for the will's security 
     let map_string =  &(json::stringify_pretty(map, 4));
@@ -54,8 +58,7 @@ fn locking_process(content: String, filepath: String) {
     write_file(&hash_destination, &(json::stringify(calculate_hash(map_string))) )
         .expect("\nFailed to save the map hash file");
     
-    println!("Your will is {} {}",
-        "locked at",
+    println!("Your will is locked at {}",
         &will_destination
     )
 }
@@ -76,19 +79,23 @@ fn unlocking_process(content: String, filepath: String) {
     
     let will_destination = concat_string_and_str(&filename, "-unlocked.txt",);
     write_file(&will_destination, &new_content)
-        .expect("\nFailed to save the translated will file.");
+        .expect("\nFailed to save the unlocked will file.");
         
-    println!("Your will is {} {}",
-        "unlocked at",
+    println!("Your will is unlocked at {}",
         &will_destination
     )
 
 }
 
 fn gen_map_qual_to_hash(hash: &u64) -> String {
-    let mut map = new_map((16,128), 4, false);
+    let mut map = new_map(WORD_LIMITS, WORD_COUNT, false);
     let mut map_string = json::stringify_pretty(map, 4);
 
+    println!("Chasing Hash... \n\t{}",
+        console::style("Cancel by entering: Ctrl c")
+            .bold()
+            .dim()
+    );
     let pb = ProgressBar::new(500);
     let spinner_style = ProgressStyle::default_spinner()
         .tick_chars("⠁⠂⠄⡀⢀⠠⠐⠈ ")
