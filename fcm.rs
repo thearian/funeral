@@ -48,8 +48,9 @@ fn declare_args(commands: &Vec<String>) -> (String, Vec<String>) {
             executer = String::from("cargo");
             args.push("run".to_owned());
             args.push("a.txt".to_owned());
-            if commands.len() > 2 {
+            if commands[2].as_str() == "U" {
                 args.push(commands[2].to_owned());
+                args.push(commands[3].to_owned());
             }
             else {
                 args.push("L".to_owned());
