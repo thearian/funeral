@@ -8,18 +8,16 @@ pub fn lock_by_map(content: &String, map: &JsonValue, word_count: usize) -> Stri
     let mut locked = String::new();
     let pb = ProgressBar::new(content.len() as u64);
     println!("Encryption is started:");
-    for letter in content.chars() {
+    content.chars().for_each(|letter| {
         pb.inc(1);
         let random_index: usize = rng.gen_range(0,word_count);
-        let mut random_index_string = random_index.to_string();
-        random_index_string.push_str("-");
         let transalted = &map[
             String::from(letter)
         ][random_index]
             .as_str()
             .expect("\nMap json is not the type it needs to be.");
         locked.push_str(transalted);
-    }
+    });
     pb.finish_with_message("Encryption is done");
     locked
 }
