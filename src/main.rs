@@ -33,7 +33,7 @@ fn main() {
 fn locking_process(content: String, filepath: String) {
     let map = new_map(WORD_LIMITS, WORD_COUNT, true);
     // Encrypt or Decrypt data
-    let new_content = lock_by_map(&content, &map);
+    let new_content = lock_by_map(&content, &map, WORD_COUNT);
     // Saving files
     let filename = filepath[..filepath.len()-4]
         .to_owned();

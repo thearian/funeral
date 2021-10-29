@@ -3,14 +3,14 @@ use rand;
 use rand::Rng;
 use indicatif::ProgressBar;
 
-pub fn lock_by_map(content: &String, map: &JsonValue) -> String {
+pub fn lock_by_map(content: &String, map: &JsonValue, word_count: usize) -> String {
     let mut rng = rand::thread_rng();
     let mut locked = String::new();
     let pb = ProgressBar::new(content.len() as u64);
     println!("Encryption is started:");
     for letter in content.chars() {
         pb.inc(1);
-        let random_index: usize = rng.gen_range(0,16);
+        let random_index: usize = rng.gen_range(0,word_count);
         let mut random_index_string = random_index.to_string();
         random_index_string.push_str("-");
         let transalted = &map[

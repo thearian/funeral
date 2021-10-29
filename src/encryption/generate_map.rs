@@ -12,16 +12,23 @@ type WordLimit = (u8, u8);
 
 pub fn new_map(word_limits: WordLimit, char_map_count: usize, include_progress: bool) -> JsonValue {
     let mut map = JsonValue::new_object();
-    let pb = ProgressBar::new(66); // ENCRYPT_DOMAIN len
+    let mut rand_memo: Vec<String> = Vec::new();
+
     if include_progress {
         println!("Map is being genereated:");
     }
+    let pb = ProgressBar::new(66); // ENCRYPT_DOMAIN len
+
     ENCRYPT_DOMAIN.iter()
         .for_each(|letter| {
             if include_progress {
                 pb.inc(1);
             }
-            map[String::from(*letter)] = gen_char_map(word_limits, char_map_count);
+            map[String::from(*letter)] = gen_char_map(
+                word_limits,
+                char_map_count,
+                &mut rand_memo
+            );
         });
     if include_progress {
         pb.finish_with_message("Map is made");
@@ -29,16 +36,36 @@ pub fn new_map(word_limits: WordLimit, char_map_count: usize, include_progress: 
     map
 }
 
-fn gen_char_map(word_limits: WordLimit, count: usize) -> JsonValue {
+fn gen_char_map(word_limits: WordLimit, count: usize, rand_memo: &mut Vec<String>) -> JsonValue {
     let mut char_map = JsonValue::new_array();
     for _ in 0..count {
-        let word = gen_word(
-            rand_range(word_limits.0 as usize, word_limits.1 as usize)
-        );
+        let (mut word,mut is_old) = gen_new_word(word_limits, rand_memo);
+        while is_old {
+            let (new_word, new_is_old) = gen_new_word(word_limits, rand_memo);
+            word = new_word;
+            is_old = new_is_old;
+        };
+        rand_memo.push(word.to_owned());
         char_map.push(word)
             .expect("Source code has unfixed bugs");
     }
     char_map
+}
+
+fn gen_new_word(
+    word_limits: WordLimit,
+    rand_memo: &mut Vec<String>
+) -> (String, bool) {
+    let word = gen_word(
+        rand_range(word_limits.0 as usize, word_limits.1 as usize)
+    );
+    let check_if_already_set: Vec<&String> = rand_memo.iter()
+        .filter( |already_set_value| {
+                *word == **already_set_value
+            }
+        )
+        .collect();
+    (word, check_if_already_set.len() > 0)
 }
 
 fn gen_word(count: usize) -> String {
