@@ -46,7 +46,7 @@ pub fn new_map(
 }
 
 
-fn gen_char_map(
+pub fn gen_char_map(
     word_limits: WordLimit,
     count: usize,
     rand_memo: &mut Vec<String>
