@@ -8,7 +8,7 @@ mod concat_str;
 use concat_str::concat_string_and_str;
 
 mod inputs;
-use inputs::{ get_and_read_inputs, get_env_args };
+use inputs::get_and_read_inputs;
 
 mod file;
 use file::{write_file, read_file};
@@ -108,11 +108,6 @@ fn locking_process(content: String, filepath: String) {
 
 
 fn unlocking_process(content: String, filepath: String) {
-    // Getting the hash from user
-    // let hash = &get_env_args()
-    //     [3]
-    //     .parse::<u64>()
-    //     .expect("Given hash is not type of Hash");
     let filename = filepath[..filepath.len()-4]
         .to_owned();
     let hash_map = json::parse(
@@ -145,46 +140,6 @@ fn unlocking_process(content: String, filepath: String) {
         &will_destination
     )
 
-}
-
-
-fn gen_map_qual_to_hash(hash: &u64) -> String {
-    let mut map = new_map(WORD_LIMITS, WORD_COUNT, false);
-    let mut map_string = json::stringify_pretty(map, 4);
-
-    // Prints
-    println!("{}\n\t{}",
-        console::style("Chasing Hash")
-            .bold()
-            .green(),
-        console::style("Cancel by entering: Ctrl c")
-            .bold()
-            .dim()
-    );
-    let pb = ProgressBar::new(500);
-    let spinner_style = ProgressStyle::default_spinner()
-        .tick_chars("⠁⠂⠄⡀⢀⠠⠐⠈ ")
-        .template("{prefix:.bold.dim} {spinner} {wide_msg}");
-    pb.set_style(spinner_style.clone());
-    pb.set_prefix(format!("[ HASH CHASE ]"));
-    let mut i = 0;
-    
-    // Chasing
-    while calculate_hash(&map_string) != *hash {
-        i += 1;
-        pb.set_message(
-            format!("({}) {}: {}",
-                i,
-                hash,
-                calculate_hash(&map_string),
-            )
-        );
-        pb.inc(1);
-
-        map = new_map((16,128), 4, false);
-        map_string = json::stringify_pretty(map, 4);
-    }
-    map_string
 }
 
 
