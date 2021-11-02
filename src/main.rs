@@ -20,14 +20,14 @@ use encryption::method_2::{
 };
 use encryption::generate_map::{
     new_map,
-    gen_char_map
+    gen_new_word
 };
 use encryption::hashing::{
     calculate_hash,
     calculate_hash_for_map
 };
 
-static WORD_LIMITS: (u8,u8) = (16, 128);
+static WORD_LIMITS: (u8,u8) = (4, 5);
 static WORD_COUNT: usize = 16;
 
 
@@ -166,55 +166,49 @@ fn gen_map_qual_to_hash_map(hash_map: &JsonValue) -> JsonValue {
         .template("{prefix:.bold.dim} {spinner} {wide_msg}");
     pb.set_style(spinner_style.clone());
     pb.set_prefix(format!("[ HASH CHASE ]"));
-    let mut i = 0;
+    let mut i = 0u64;
 
     // Chase
-    for (letter, letter_hash_json) in hash_map.entries() {
-        let mut volenteer = gen_char_map(
-            WORD_LIMITS,
-            WORD_COUNT,
-            &mut rand_memo
-        );
-        let mut char_map_string = json::stringify(volenteer);
-        let mut letter_hash: u64 = letter_hash_json
-            .as_u64()
-            .expect("Hash map is not made of numbers");
-
-        while calculate_hash(&char_map_string) != letter_hash {
-            // Timing
-            i += 1;
-            let max_states: u64 = (WORD_COUNT as u64) * num::pow(66, WORD_LIMITS.1 as usize);
-            let duration = start.elapsed();
-            let max_secs = duration.as_secs() * max_states / i;
-            let max_duration = Duration::from_secs(max_secs);
-
-            // Prints
-            pb.set_message(
-                format!("({}) {}/{} ({}%) ({}/{}): {} != {}",
-                    letter,
-                    i,
-                    max_states,
-                    ((i/max_states) * 100) as f32,
-                    to_min(duration.as_secs()),
-                    to_min(max_duration.as_secs()),
-                    letter_hash,
-                    calculate_hash(&char_map_string),
-                )
-            );
-            pb.inc(1);
-
-            volenteer = gen_char_map(
-                WORD_LIMITS,
-                WORD_COUNT,
-                &mut rand_memo
-            );
-            char_map_string = json::stringify(volenteer);
-            letter_hash = letter_hash_json
+    for (letter, translations) in hash_map.entries() {
+        for translation in translations.members() {
+            let mut volenteer = get_new_translation(&mut rand_memo);
+            let mut original_hash: u64 = translation
                 .as_u64()
                 .expect("Hash map is not made of numbers");
+
+            while calculate_hash(&volenteer) != original_hash {
+                // Timing
+                i += 1;
+                let max_states = num::pow(66, WORD_LIMITS.1 as usize);
+                let duration = start.elapsed();
+                let max_secs = duration.as_secs() * max_states / i;
+                let max_duration = Duration::from_secs(max_secs);
+    
+                // Prints
+                pb.set_message(
+                    format!("({}) {}/{} ({}%) ({}/{}): {} != {}",
+                        letter,
+                        i,
+                        max_states,
+                        ((i/max_states) * 100),
+                        to_min(duration.as_secs()),
+                        get_hours(max_duration.as_secs()),
+                        original_hash,
+                        calculate_hash(&volenteer),
+                    )
+                );
+                pb.inc(1);
+    
+                volenteer = get_new_translation(&mut rand_memo);
+                original_hash = translation
+                    .as_u64()
+                    .expect("Hash map is not made of numbers");
+            }
+            map[letter].push(
+                json::parse(&volenteer)
+                    .expect("Failed to parse guess translation")
+            ).expect("Guess has some problem");
         }
-        map[letter] = json::parse(&char_map_string)
-            .expect("Failed to parse guess char map");
     }
     map
 }
@@ -226,4 +220,25 @@ fn to_min(secs: u64) -> String {
     let hours = (secs - (minuts * 60) - seconds) / 60;
 
     String::from(format!("{}:{}:{}",hours,minuts,seconds))
+}
+
+fn get_hours(secs: u64) -> String {
+    let hours: u64 = secs / 3600;
+    let days: u64 = hours / 24;
+    if hours > 100 {
+        return String::from(format!("{}d",days))
+    }
+    else {
+        return String::from(format!("{}h",hours))
+    }
+}
+
+fn get_new_translation(rand_memo: &mut Vec<String>) -> String {
+    let (mut volenteer,mut is_old) = gen_new_word(WORD_LIMITS, rand_memo);
+    while is_old {
+        let (new_word, new_is_old) = gen_new_word(WORD_LIMITS, rand_memo);
+        volenteer = new_word;
+        is_old = new_is_old;
+    };
+    return volenteer;
 }

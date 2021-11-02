@@ -12,19 +12,18 @@ pub fn calculate_hash<T: Hash>(t: &T) -> u64 {
 pub fn calculate_hash_for_map(map: &JsonValue) -> JsonValue {
     let mut hash_map = JsonValue::new_object();
     for (letter, translations) in map.entries() {
-        let translations_vec: Vec<String> = translations
+        let translations_vec: Vec<u64> = translations
             .members()
             .map(|tr| {
-                tr.as_str()
-                    .expect("asd")
+                calculate_hash(&tr.as_str()
+                    .expect("")
                     .to_owned()
+                )
             })
             .collect();
         hash_map[
             String::from(letter)
-        ] = json::from(
-            calculate_hash(&translations_vec)
-        );
+        ] = json::from(translations_vec);
     }
     hash_map
 }

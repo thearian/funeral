@@ -46,7 +46,7 @@ pub fn new_map(
 }
 
 
-pub fn gen_char_map(
+fn gen_char_map(
     word_limits: WordLimit,
     count: usize,
     rand_memo: &mut Vec<String>
@@ -69,7 +69,7 @@ pub fn gen_char_map(
 }
 
 
-fn gen_new_word(
+pub fn gen_new_word(
     word_limits: WordLimit,
     rand_memo: &mut Vec<String>
 ) -> (String, bool) {
